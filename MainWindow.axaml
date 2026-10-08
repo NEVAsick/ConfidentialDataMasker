@@ -1,0 +1,109 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="using:ConfidentialDataMasker.Controls"
+        xmlns:vm="using:ConfidentialDataMasker.ViewModels"
+        xmlns:models="using:ConfidentialDataMasker.Models"
+        mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="720"
+        x:Class="ConfidentialDataMasker.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Скрытие конфиденциальных данных в PDF"
+        Width="1100" Height="720">
+
+    <Grid ColumnDefinitions="300,*" RowDefinitions="*,Auto">
+
+        <Grid Grid.Column="0" Grid.Row="0" Margin="10" RowDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto">
+
+            <Button Grid.Row="0" Content="Добавить PDF-файлы..." Command="{Binding AddFilesCommand}"
+                    Classes="accent" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                    Margin="0,0,0,10" />
+
+            <Button Grid.Row="1" Content="Папка для сохранения..." Command="{Binding ChooseOutputFolderCommand}"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,0,0,4" />
+            <TextBlock Grid.Row="2" Text="{Binding OutputFolder}" TextWrapping="Wrap"
+                       FontSize="11" Foreground="Gray" Margin="0,0,0,8" />
+
+            <ListBox Grid.Row="3" ItemsSource="{Binding Queue}" SelectedItem="{Binding SelectedItem}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:PdfQueueItem">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Text="{Binding FileName}" TextTrimming="CharacterEllipsis"
+                                       ToolTip.Tip="{Binding FilePath}" />
+                            <TextBlock Grid.Column="1" Text="{Binding StatusText}" FontSize="11" Foreground="Gray"
+                                       Margin="6,0,0,0" VerticalAlignment="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <Button Grid.Row="4" Content="Обработать все без проверки" Command="{Binding AutoProcessQueueCommand}"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,10,0,0"
+                    ToolTip.Tip="Закрасить всё найденное во всех файлах очереди и сразу сохранить" />
+
+            <Button Grid.Row="5" Content="Словарь названий..." Command="{Binding OpenDictionaryCommand}"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,6,0,0"
+                    ToolTip.Tip="Названия и домены, которые нужно закрывать всегда. После сохранения словаря документ проверяется заново сам" />
+
+            <CheckBox Grid.Row="6" Content="Проверять сканы моделью Qwen" IsChecked="{Binding UseVisionModel}" Margin="0,8,0,0"
+                      ToolTip.Tip="Трудные места сканов и фото (рядом с подписями и печатями, плохо распознанные строки) дополнительно читает модель через Ollama на этом компьютере или сервере. Медленно. Адрес и модель — в файле %AppData%\ConfidentialDataMasker\vision.json" />
+        </Grid>
+
+        <Grid Grid.Column="1" Grid.Row="0" Margin="0,10,10,10" RowDefinitions="Auto,*">
+
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                <TextBlock Grid.Column="0" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="12" Foreground="Gray"
+                           Text="Рамки — найденное программой, закрасится при сохранении. Клик по рамке — подтвердить, правый клик — выбрать тип или не закрывать. Протяните мышью, чтобы закрасить вручную." />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="12,0,0,0">
+                    <Button Content="−" Command="{Binding ZoomOutCommand}" Width="36"
+                            HorizontalContentAlignment="Center" ToolTip.Tip="Уменьшить" />
+                    <Button Content="{Binding ZoomPercentText}" Command="{Binding ResetZoomCommand}" Width="64"
+                            HorizontalContentAlignment="Center" ToolTip.Tip="Вернуть 100%" />
+                    <Button Content="+" Command="{Binding ZoomInCommand}" Width="36"
+                            HorizontalContentAlignment="Center" ToolTip.Tip="Увеличить" />
+                    <Button Content="Сохранить PDF" Command="{Binding SaveRedactedCommand}" Classes="accent"
+                            Margin="12,0,0,0" ToolTip.Tip="Сохранить закрашенную копию выбранного файла" />
+                </StackPanel>
+            </Grid>
+
+            <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1">
+                <Panel>
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Pages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:PageViewModel">
+                                    <StackPanel Margin="8,8,8,20">
+                                        <TextBlock Text="{Binding PageNumber, StringFormat='Страница {0}'}"
+                                                   FontSize="12" Foreground="Gray" Margin="0,0,0,4" />
+                                        <controls:RedactionCanvas
+                                            PageImage="{Binding PageImage}"
+                                            Zoom="{Binding Zoom}"
+                                            Rectangles="{Binding Rectangles}"
+                                            Suggestions="{Binding Suggestions}"
+                                            AddRectangleCommand="{Binding AddRectangleCommand}"
+                                            RemoveRectangleCommand="{Binding RemoveRectangleCommand}"
+                                            AcceptSuggestionCommand="{Binding AcceptSuggestionCommand}"
+                                            RejectSuggestionCommand="{Binding RejectSuggestionCommand}"
+                                            ClassifyRectangleCommand="{Binding ClassifyRectangleCommand}"
+                                            AcceptSuggestionAsCommand="{Binding AcceptSuggestionAsCommand}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <TextBlock IsVisible="{Binding !HasPages}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                               TextAlignment="Center" FontSize="14" Foreground="Gray"
+                               Text="Добавьте PDF-файлы кнопкой слева.&#10;Программа сама найдёт ФИО, паспортные данные, телефоны, подписи и печати." />
+                </Panel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="1" Grid.ColumnSpan="2" BorderBrush="LightGray" BorderThickness="0,1,0,0" Padding="10,6">
+            <Grid ColumnDefinitions="Auto,*">
+                <ProgressBar Grid.Column="0" IsIndeterminate="True" IsVisible="{Binding IsDetecting}"
+                             Width="80" Margin="0,0,10,0" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="{Binding StatusText}" TextWrapping="Wrap" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

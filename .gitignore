@@ -1,0 +1,12 @@
+bin/
+obj/
+.vs/
+.idea/
+.vscode/
+*.user
+*.DotSettings.user
+*.bak
+*.bak_*
+tessdata_best/
+Thumbs.db
+.DS_Store

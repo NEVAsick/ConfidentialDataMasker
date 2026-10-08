@@ -1,0 +1,7 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ConfidentialDataMasker.Controls.RedactionCanvas">
+    <Canvas x:Name="OverlayCanvas" Background="Transparent" HorizontalAlignment="Left">
+        <Image x:Name="ImageHost" Stretch="Uniform" RenderOptions.BitmapInterpolationMode="HighQuality" />
+    </Canvas>
+</UserControl>
