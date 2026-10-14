@@ -20,14 +20,14 @@
 
 ## Требования
 
-- Windows 10/11 x64 (проект собирается и под Linux, но проверялся только на Windows);
+- Windows 10/11 x64 или Linux x64;
 - [.NET SDK 10](https://dotnet.microsoft.com/download);
 - для проверки моделью (необязательно): [Ollama](https://ollama.com) и модель `qwen3.5:4b`.
 
 ## Сборка и запуск
 
 ```
-git clone <адрес репозитория>
+git clone https://github.com/NEVAsick/ConfidentialDataMasker.git
 cd ConfidentialDataMasker
 dotnet run -c Release
 ```
@@ -38,6 +38,27 @@ dotnet run -c Release
 
 ```
 ollama pull qwen3.5:4b
+```
+
+## Запуск на Linux
+
+Сборка и запуск те же: `dotnet run -c Release`.
+
+В проект явно подключён пакет `SkiaSharp.NativeAssets.Linux` той же версии, что и SkiaSharp. Без него в папку сборки попадает старая библиотека `libSkiaSharp.so` от Avalonia, и программа при запуске падает с ошибкой «The version of the native libSkiaSharp library (119.0) is incompatible». Если проект уже собирался раньше, перед запуском удалите старую сборку:
+
+```
+rm -rf bin obj
+dotnet run -c Release
+```
+
+Пакет Tesseract для .NET содержит готовые библиотеки распознавания только для Windows. Если при открытии скана появляется ошибка `DllNotFoundException` про leptonica или tesseract, установите их из репозитория дистрибутива и сделайте ссылки с именами, которые ищет пакет (пример для Ubuntu/Debian):
+
+```
+sudo apt install libtesseract5 liblept5
+cd bin/Release/net10.0
+mkdir -p x64
+ln -s /usr/lib/x86_64-linux-gnu/liblept.so.5 x64/libleptonica-1.82.0.so
+ln -s /usr/lib/x86_64-linux-gnu/libtesseract.so.5 x64/libtesseract50.so
 ```
 
 ## Работа с программой
@@ -53,7 +74,7 @@ ollama pull qwen3.5:4b
 
 ## Файлы настроек
 
-Все файлы лежат в папке `%AppData%\ConfidentialDataMasker`:
+Все файлы лежат в папке `%AppData%\ConfidentialDataMasker` (на Linux — `~/.config/ConfidentialDataMasker`):
 
 | Файл | Назначение |
 |---|---|

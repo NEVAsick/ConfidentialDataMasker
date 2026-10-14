@@ -33,5 +33,6 @@
     <PackageReference Include="PDFsharp" Version="6.2.4" />
     <PackageReference Include="Tesseract" Version="5.2.0" />
     <PackageReference Include="PdfPig" Version="0.1.16" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.150.1" />
   </ItemGroup>
 </Project>
